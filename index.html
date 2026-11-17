@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diario de pis y patas</title>
+<meta name="theme-color" content="#e8833a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#fff8f0;--card:#fff;--tx:#3b2f2f;--mu:#8a7a72;--ln:#f0e3d6;--pr:#e8833a;--a:#3d94d6;--b:#8b6bd6;--ok:#3a9d6b;--bad:#d9534f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f1a17;--card:#2b2420;--tx:#f4ebe4;--mu:#b3a399;--ln:#3d332d;--a:#5fb0ea;--b:#a68df0}}
+:root[data-theme="dark"]{--bg:#1f1a17;--card:#2b2420;--tx:#f4ebe4;--mu:#b3a399;--ln:#3d332d;--a:#5fb0ea;--b:#a68df0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--ln)}
+.w{max-width:980px;margin:0 auto;padding:0 14px}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0}
+h1{font-size:1.15rem;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+.pri{background:var(--pr);color:#fff;border:0;border-radius:999px;padding:12px 20px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(232,131,58,.35)}
+.sec{background:transparent;border:1px solid var(--ln);border-radius:999px;padding:10px 16px;cursor:pointer}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+nav button{white-space:nowrap;border:0;background:transparent;border-radius:999px;padding:8px 14px;cursor:pointer;color:var(--mu);font-weight:600}
+nav button.on{background:var(--pr);color:#fff}
+main{padding:16px 0 60px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px}
+.card .lb{font-size:.78rem;color:var(--mu);display:block}
+.card b{font-size:1.5rem;display:block;margin:2px 0}
+small{color:var(--mu);font-size:.8rem}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-bottom:12px}
+h3{margin:0 0 8px;font-size:1rem}
+.ch{width:100%;height:auto;display:block}.tk{font-size:9px;fill:var(--mu)}
+.lg{font-size:.8rem;color:var(--mu);margin-top:6px}.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 4px 0 8px}.lg i:first-child{margin-left:0}
+.tg{display:flex;gap:6px;margin-bottom:8px}.tg button{border:1px solid var(--ln);background:transparent;border-radius:999px;padding:4px 12px;cursor:pointer}.tg button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.rb{margin:8px 0}.rb div{height:12px;border-radius:6px;background:var(--ln);overflow:hidden;margin-top:3px}.rb div i{display:block;height:100%}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+label{display:block;font-size:.82rem;color:var(--mu)}
+input,select,textarea{width:100%;border:1px solid var(--ln);border-radius:10px;padding:10px;background:var(--card);margin-top:3px}
+.it{display:flex;gap:10px;background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:8px;align-items:flex-start}
+.no{font-weight:800;color:var(--pr);min-width:38px}
+.bd{flex:1;min-width:0}.bd p{margin:4px 0;word-break:break-word}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.85rem;background:color-mix(in srgb,var(--c) 20%,transparent);border:1px solid var(--c)}
+.ac button{border:0;background:transparent;font-size:1.1rem;cursor:pointer;padding:4px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dh{text-align:center;font-size:.75rem;color:var(--mu)}
+.dy{min-height:54px;border:1px solid var(--ln);border-radius:10px;background:var(--card);cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.dy.has{background:color-mix(in srgb,var(--pr) 14%,var(--card))}.dy.tod{border-color:var(--pr);border-width:2px}.dy.sel{outline:2px solid var(--b)}
+.dy em{font-style:normal;font-weight:800;font-size:.9rem}.dots i{display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 1px}
+.cn{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.cn button{border:1px solid var(--ln);background:var(--card);border-radius:10px;padding:6px 14px;cursor:pointer}
+.tl{border-left:3px solid var(--ln);margin-left:8px;padding-left:16px}
+.te{position:relative;margin-bottom:12px;cursor:pointer}.te::before{content:"";position:absolute;left:-24px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--c)}
+.dg{font-weight:700;margin:16px 0 8px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center;padding:0}
+.mo[hidden]{display:none}
+.dlg{background:var(--bg);width:100%;max-width:480px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+@media(min-width:600px){.mo{align-items:center;padding:16px}.dlg{border-radius:20px}}
+.dlg h2{margin:0 0 10px;font-size:1.2rem}.dlg label{margin-top:10px}
+.rs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.rd input{position:absolute;opacity:0;width:0}.rd span{display:block;text-align:center;border:2px solid var(--ln);border-radius:14px;padding:14px 6px;cursor:pointer;color:var(--tx);font-size:.95rem}
+.rd input:checked+span.a{border-color:var(--a);background:color-mix(in srgb,var(--a) 18%,transparent)}.rd input:checked+span.b{border-color:var(--b);background:color-mix(in srgb,var(--b) 18%,transparent)}
+.bt{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.dlg .g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#ts{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ok);color:#fff;padding:10px 18px;border-radius:999px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw}#ts.on{opacity:1}
+.empty{text-align:center;padding:30px 10px;color:var(--mu)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+</style></head><body>
+<header><div class="w"><div class="hd"><h1>🐶 Diario de pis y patas</h1><button class="pri" onclick="openForm()">+ Registrar incidente</button></div><nav id="nv"></nav></div></header>
+<main class="w" id="v"></main>
+<div class="mo" id="mo" hidden></div><div id="ts"></div>
+<script>
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
+const R={pis:{n:'Se ha meado',c:'var(--a)',i:'💧',k:'a'},patas:{n:'Se ha chupado las patas',c:'var(--b)',i:'🐾',k:'b'}};
+const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],MS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const TABS=[['panel','📊 Panel'],['hist','📋 Historial'],['cal','📅 Calendario'],['tl','🕒 Cronología'],['notas','📝 Notas'],['datos','💾 Datos']];
+let S={inc:[],next:1,notes:[]},tab='panel',F={q:'',m:'',day:'',from:'',to:''},evo='w',DL=null,db=null;
+const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),tstr=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+const pd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const ts=i=>new Date(i.date+'T'+i.time).getTime();
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fd=s=>{const[y,m,d]=s.split('-');return d+'/'+m+'/'+y};
+const mk=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return dstr(x)};
+const cnt=l=>{const a=l.filter(i=>i.r==='pis').length;return{t:l.length,a,b:l.length-a}};
+const sp=c=>`<small>💧 ${c.a} · 🐾 ${c.b}</small>`;
+function el(ms){const m=Math.round(ms/6e4);if(m<1)return'menos de 1 min';const d=Math.floor(m/1440),h=Math.floor(m%1440/60),mi=m%60;return d?`${d} d ${h} h`:h?`${h} h ${mi} min`:`${mi} min`}
+const sorted=()=>[...S.inc].sort((x,y)=>ts(y)-ts(x)||y.id-x.id);
+function gaps(){const a=[...S.inc].sort((x,y)=>ts(x)-ts(y)||x.id-y.id),g={};a.forEach((i,k)=>{g[i.id]=k?ts(i)-ts(a[k-1]):null});return g}
+/* ---------- Persistencia (IndexedDB + copia en localStorage) ---------- */
+function idb(){return db||(db=new Promise((res,rej)=>{try{const r=indexedDB.open('diario-perro',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}}))}
+async function load(){let d=null;try{const h=await idb();d=await new Promise((res,rej)=>{const q=h.transaction('kv').objectStore('kv').get('data');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}catch(e){}
+ if(!d){try{d=JSON.parse(localStorage.getItem('diario-perro'))}catch(e){}}
+ if(d&&Array.isArray(d.inc)){S={inc:d.inc,next:d.next||1,notes:d.notes||[]};S.next=Math.max(S.next,...S.inc.map(i=>i.id+1),1)}}
+async function persist(){try{const h=await idb();await new Promise((res,rej)=>{const t=h.transaction('kv','readwrite');t.objectStore('kv').put(JSON.parse(JSON.stringify(S)),'data');t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){}
+ try{localStorage.setItem('diario-perro',JSON.stringify(S))}catch(e){}}
+function toast(m){const t=$('#ts');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)}
+/* ---------- Gráficos ---------- */
+function chart(L,A,B,k=1){const W=360,H=170,pl=20,pb=22,pt=14,n=L.length,bw=(W-pl)/n,mx=Math.max(1,...A.map((a,i)=>a+B[i])),sc=(H-pb-pt)/mx;
+ let s=`<svg viewBox="0 0 ${W} ${H}" class="ch"><line x1="${pl}" x2="${W}" y1="${H-pb}" y2="${H-pb}" stroke="var(--ln)"/><text x="0" y="${pt+4}" class="tk">${mx}</text>`;
+ L.forEach((l,i)=>{const x=pl+i*bw+bw*.15,w=bw*.7,ha=A[i]*sc,hb=B[i]*sc;
+  if(A[i])s+=`<rect x="${x}" y="${H-pb-ha}" width="${w}" height="${ha}" rx="2" fill="var(--a)"/>`;
+  if(B[i])s+=`<rect x="${x}" y="${H-pb-ha-hb}" width="${w}" height="${hb}" rx="2" fill="var(--b)"/>`;
+  if(A[i]+B[i])s+=`<text x="${x+w/2}" y="${H-pb-ha-hb-3}" text-anchor="middle" class="tk">${A[i]+B[i]}</text>`;
+  if(i%k===0)s+=`<text x="${x+w/2}" y="${H-7}" text-anchor="middle" class="tk">${l}</text>`});
+ return s+'</svg><div class="lg"><i style="background:var(--a)"></i>Se ha meado<i style="background:var(--b)"></i>Se ha chupado las patas</div>'}
+function series(keys,fn){const m={};keys.forEach(k=>m[k]=[0,0]);S.inc.forEach(i=>{const k=fn(i);if(m[k])m[k][i.r==='pis'?0:1]++});return[keys.map(k=>m[k][0]),keys.map(k=>m[k][1])]}
+/* ---------- Vistas ---------- */
+const card=(t,v,s)=>`<div class="card"><span class="lb">${t}</span><b>${v}</b>${s}</div>`;
+function vPanel(){const I=S.inc;if(!I.length)return`<div class="card empty"><div style="font-size:3rem">🐾</div><p>Todavía no hay registros.<br>Pulsa «+ Registrar incidente» para empezar.</p></div>`;
+ const n=new Date(),td=dstr(n),wk=mk(n),mo=td.slice(0,7),tot=cnt(I),hoy=cnt(I.filter(i=>i.date===td)),sem=cnt(I.filter(i=>mk(pd(i.date))===wk)),mes=cnt(I.filter(i=>i.date.startsWith(mo)));
+ const f=I.reduce((m,i)=>i.date<m?i.date:m,td),span=Math.round((pd(td)-pd(f))/864e5)+1,av=x=>(x/span).toFixed(2).replace('.',',');
+ const byD={};I.forEach(i=>(byD[i.date]=byD[i.date]||[]).push(i));
+ const top=Object.entries(byD).sort((x,y)=>y[1].length-x[1].length||(y[0]>x[0]?1:-1))[0];
+ const H=Array.from({length:24},()=>({a:0,b:0}));I.forEach(i=>H[+i.time.slice(0,2)][R[i.r].k]++);
+ let th=0;H.forEach((h,k)=>{if(h.a+h.b>H[th].a+H[th].b)th=k});
+ const since=r=>{const l=sorted().find(i=>!r||i.r===r);return l?el(Date.now()-ts(l)):'—'};
+ const tc=tot.a===tot.b?'Empate':tot.a>tot.b?'💧 Se ha meado':'🐾 Se ha chupado las patas';
+ const hrs=[...Array(24).keys()],wd=series(DOW,i=>DOW[(pd(i.date).getDay()+6)%7]);
+ const d14=[...Array(14)].map((_,k)=>{const x=new Date();x.setDate(x.getDate()-13+k);return dstr(x)}),sd=series(d14,i=>i.date);
+ let ev;if(evo==='w'){const st=pd(wk),ks=[...Array(12)].map((_,k)=>{const x=new Date(st);x.setDate(x.getDate()-7*(11-k));return dstr(x)});const s=series(ks,i=>mk(pd(i.date)));ev=chart(ks.map(k=>k.slice(8)+'/'+k.slice(5,7)),s[0],s[1],2)}
+ else{const ks=[...Array(12)].map((_,k)=>{const x=new Date(n.getFullYear(),n.getMonth()-11+k,1);return x.getFullYear()+'-'+pad(x.getMonth()+1)});const s=series(ks,i=>i.date.slice(0,7));ev=chart(ks.map(k=>MS[+k.slice(5)-1]),s[0],s[1])}
+ const pc=x=>tot.t?Math.round(100*x/tot.t):0;
+ return`<div class="cards">${card('Total de incidentes',tot.t,sp(tot))}${card('Hoy',hoy.t,sp(hoy))}${card('Esta semana',sem.t,sp(sem))}${card('Este mes',mes.t,sp(mes))}
+ ${card('Media diaria',av(tot.t),`<small>💧 ${av(tot.a)} · 🐾 ${av(tot.b)}</small>`)}${card('Día con más incidentes',fd(top[0]),`<small>${top[1].length} incidentes</small>`)}
+ ${card('Motivo más frecuente',`<span style="font-size:1.05rem">${tc}</span>`,sp(tot))}${card('Hora habitual',pad(th)+':00–'+pad(th)+':59',`<small>💧 ${H[th].a} · 🐾 ${H[th].b}</small>`)}
+ ${card('Tiempo desde el último',since(),`<small>💧 ${since('pis')} · 🐾 ${since('patas')}</small>`)}</div>
+ <div class="g2"><div class="card"><h3>Por motivos</h3>${['pis','patas'].map(r=>{const c=tot[R[r].k];return`<div class="rb"><span>${R[r].i} ${R[r].n}: <b>${c}</b> (${pc(c)}%)</span><div><i style="width:${pc(c)}%;background:${R[r].c}"></i></div></div>`}).join('')}</div>
+ <div class="card"><h3>Por día (últimos 14 días)</h3>${chart(d14.map(k=>k.slice(8)+'/'+k.slice(5,7)),sd[0],sd[1],2)}</div>
+ <div class="card"><h3>Por día de la semana</h3>${chart(DOW,wd[0],wd[1])}</div>
+ <div class="card"><h3>Por horas</h3>${chart(hrs.map(h=>pad(h)),H.map(h=>h.a),H.map(h=>h.b),3)}</div>
+ <div class="card" style="grid-column:1/-1"><h3>Evolución</h3><div class="tg"><button class="${evo==='w'?'on':''}" onclick="evo='w';render()">Semanal</button><button class="${evo==='m'?'on':''}" onclick="evo='m';render()">Mensual</button></div>${ev}</div></div>`}
+function row(i,g){const r=R[i.r];return`<div class="it"><div class="no">#${i.id}</div><div class="bd"><div><span class="tag" style="--c:${r.c}">${r.i} ${r.n}</span> <b>${fd(i.date)}</b> · ${i.time}</div>${i.notes?`<p>${esc(i.notes)}</p>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div><div class="ac"><button onclick="openForm(${i.id})" title="Editar">✏️</button><button onclick="del(${i.id})" title="Eliminar">🗑️</button></div></div>`}
+function filt(){const q=F.q.toLowerCase();return sorted().filter(i=>(!F.m||i.r===F.m)&&(!F.day||i.date===F.day)&&(!F.from||i.date>=F.from)&&(!F.to||i.date<=F.to)&&(!q||`#${i.id} ${R[i.r].n} ${i.notes} ${fd(i.date)} ${i.time}`.toLowerCase().includes(q)))}
+function hlist(){const l=filt(),g=gaps();return`<small>${l.length} de ${S.inc.length} registros</small><div style="margin-top:8px">${l.length?l.map(i=>row(i,g)).join(''):'<div class="empty">No hay registros con estos filtros.</div>'}</div>`}
+function setF(k,v){F[k]=v;$('#hl').innerHTML=hlist()}
+function vHist(){return`<div class="fl"><label>Buscar<input type="search" value="${esc(F.q)}" oninput="setF('q',this.value)" placeholder="Texto, nº, fecha…"></label>
+ <label>Motivo<select onchange="setF('m',this.value)"><option value="">Todos</option><option value="pis" ${F.m==='pis'?'selected':''}>Se ha meado</option><option value="patas" ${F.m==='patas'?'selected':''}>Se ha chupado las patas</option></select></label>
+ <label>Día concreto<input type="date" value="${F.day}" onchange="setF('day',this.value)"></label><label>Desde<input type="date" value="${F.from}" onchange="setF('from',this.value)"></label><label>Hasta<input type="date" value="${F.to}" onchange="setF('to',this.value)"></label></div>
+ <button class="sec" onclick="F={q:'',m:'',day:'',from:'',to:''};render()">Limpiar filtros</button><div id="hl" style="margin-top:10px">${hlist()}</div>`}
+const n0=new Date();let cal={y:n0.getFullYear(),m:n0.getMonth(),sel:dstr(n0)};
+function vCal(){const{y,m}=cal,off=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),td=dstr(new Date()),by={};S.inc.forEach(i=>(by[i.date]=by[i.date]||[]).push(i));
+ let g=DOW.map(d=>`<div class="dh">${d}</div>`).join('')+'<i></i>'.repeat(off);
+ for(let d=1;d<=dim;d++){const ds=`${y}-${pad(m+1)}-${pad(d)}`,L=by[ds]||[],c=cnt(L);g+=`<button class="dy ${L.length?'has':''} ${ds===cal.sel?'sel':''} ${ds===td?'tod':''}" onclick="cal.sel='${ds}';render()"><span>${d}</span>${L.length?`<em>${L.length}</em><span class="dots">${c.a?'<i style="background:var(--a)"></i>':''}${c.b?'<i style="background:var(--b)"></i>':''}</span>`:''}</button>`}
+ const gp=gaps(),day=(by[cal.sel]||[]).sort((x,z)=>ts(z)-ts(x));
+ return`<div class="cn"><button onclick="calGo(-1)">‹</button><b>${MES[m]} ${y}</b><button onclick="calGo(1)">›</button></div><div class="cal">${g}</div>
+ <div class="dg">${fd(cal.sel)} · ${day.length} incidente${day.length===1?'':'s'}</div>${day.map(i=>row(i,gp)).join('')||'<div class="empty">Sin incidentes este día.</div>'}<button class="sec" onclick="openForm(null,'${cal.sel}')">+ Añadir en este día</button>`}
+function calGo(d){const x=new Date(cal.y,cal.m+d,1);cal.y=x.getFullYear();cal.m=x.getMonth();render()}
+function vTl(){if(!S.inc.length)return'<div class="empty">Aún no hay incidentes.</div>';const g=gaps();let h='',last='';
+ sorted().forEach(i=>{if(i.date!==last){last=i.date;h+=`</div><div class="dg">${fd(i.date)}</div><div class="tl">`}
+  h+=`<div class="te" style="--c:${R[i.r].c}" onclick="openForm(${i.id})"><b>${i.time}</b> · #${i.id} <span class="tag" style="--c:${R[i.r].c}">${R[i.r].i} ${R[i.r].n}</span>${i.notes?`<div>${esc(i.notes)}</div>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div>`});
+ return h.slice(6)+'</div>'}
+function vNotas(){return`<label>Nota general sobre el comportamiento<textarea id="nt" rows="3" placeholder="Ej.: se pone nervioso cuando suena el timbre…"></textarea></label><div class="row"><button class="pri" onclick="addNote()">Guardar nota</button></div>
+ ${[...S.notes].reverse().map(n=>`<div class="it"><div class="bd"><small>${fd(n.date)}</small><p>${esc(n.text)}</p></div><div class="ac"><button onclick="delNote(${n.id})">🗑️</button></div></div>`).join('')||'<div class="empty">No hay notas.</div>'}`}
+function vDatos(){return`<div class="card"><h3>Copias y exportación</h3><p><small>Los datos se guardan en este navegador (IndexedDB) y siguen ahí al cerrar la página o apagar el equipo. Si borras los datos del navegador se perderían: descarga copias de vez en cuando.</small></p>
+ <div class="row"><button class="sec" onclick="expCSV()">⬇️ Exportar a CSV (Excel)</button><button class="sec" onclick="expJSON()">⬇️ Copia de seguridad (JSON)</button><button class="sec" onclick="$('#imp').click()">⬆️ Importar copia</button></div>
+ <input type="file" id="imp" accept=".json,application/json" hidden onchange="imp(this.files[0])"></div>`}
+function render(){$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
+ $('#v').innerHTML=({panel:vPanel,hist:vHist,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
+/* ---------- Formulario y acciones ---------- */
+function openM(h){const m=$('#mo');m.innerHTML=`<div class="dlg">${h}</div>`;m.hidden=false}
+function closeM(){$('#mo').hidden=true}
+$('#mo').addEventListener('click',e=>{if(e.target.id==='mo')closeM()});
+function openForm(id,date){const e=id?S.inc.find(i=>i.id===id):null,n=new Date(),r=e?e.r:'pis';
+ openM(`<h2>${e?'Editar incidente':'Registrar incidente'} <span class="no">#${e?e.id:S.next}</span></h2>
+ <div class="g"><label>Fecha<input type="date" id="fdt" value="${e?e.date:date||dstr(n)}"></label><label>Hora<input type="time" id="fhr" value="${e?e.time:tstr(n)}"></label></div>
+ <label>Motivo</label><div class="rs"><label class="rd"><input type="radio" name="fr" value="pis" ${r==='pis'?'checked':''}><span class="a">💧 Se ha meado</span></label><label class="rd"><input type="radio" name="fr" value="patas" ${r==='patas'?'checked':''}><span class="b">🐾 Se ha chupado las patas</span></label></div>
+ <label>Observaciones<textarea id="fob" rows="3" placeholder="Detalles adicionales (opcional)">${e?esc(e.notes):''}</textarea></label>
+ <div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" onclick="saveInc(${e?e.id:0})">Guardar</button></div>`)}
+async function saveInc(id){const date=$('#fdt').value,time=$('#fhr').value,r=document.querySelector('input[name=fr]:checked').value,notes=$('#fob').value.trim();
+ if(!date||!time){toast('Indica fecha y hora');return}
+ let n;if(id){const e=S.inc.find(i=>i.id===id);Object.assign(e,{date,time,r,notes});n=id}else{n=S.next++;S.inc.push({id:n,date,time,r,notes})}
+ await persist();closeM();cal.sel=date;render();toast(`✅ Incidente #${n} guardado`)}
+function del(id){openM(`<h2>¿Eliminar el incidente #${id}?</h2><p>Esta acción no se puede deshacer. El número #${id} no se volverá a usar.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" style="background:var(--bad)" onclick="doDel(${id})">Eliminar</button></div>`)}
+async function doDel(id){S.inc=S.inc.filter(i=>i.id!==id);await persist();closeM();render();toast('🗑️ Incidente eliminado')}
+async function addNote(){const t=$('#nt').value.trim();if(!t)return;S.notes.push({id:Date.now(),date:dstr(new Date()),text:t});await persist();render();toast('✅ Nota guardada')}
+async function delNote(id){S.notes=S.notes.filter(n=>n.id!==id);await persist();render()}
+/* ---------- Exportar / importar ---------- */
+function saveFile(name,data){const fb=()=>openM(`<h2>Copia el contenido</h2><p><small>No se puede descargar directamente aquí. Copia el texto y guárdalo como ${name}.</small></p><textarea rows="10" readonly onfocus="this.select()">${esc(data)}</textarea><div class="bt"><button class="sec" onclick="closeM()">Cerrar</button></div>`);
+ if(!DL){try{const b=new Blob([data],{type:name.endsWith('.json')?'application/json':'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('✅ Archivo guardado en Descargas');return}catch(e){return fb()}}DL.save({filename:name,data}).then(()=>toast('✅ Archivo guardado')).catch(e=>{if(e&&e.code!=='declined')fb()})}
+function expCSV(){const g=gaps(),q=v=>'"'+String(v).replace(/"/g,'""')+'"',rows=[...S.inc].sort((a,b)=>a.id-b.id).map(i=>[i.id,fd(i.date),i.time,R[i.r].n,q(i.notes),g[i.id]==null?'':el(g[i.id])].join(';'));
+ saveFile('incidentes-perro.csv','\uFEFF'+['Número;Fecha;Hora;Motivo;Observaciones;Tiempo desde el anterior',...rows].join('\r\n'))}
+function expJSON(){saveFile('copia-diario-perro-'+dstr(new Date())+'.json',JSON.stringify({app:'diario-perro',version:1,...S},null,1))}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.inc))throw 0;
+  const inc=d.inc.filter(i=>i&&R[i.r]&&i.date&&i.time).map(i=>({id:+i.id,date:i.date,time:i.time,r:i.r,notes:i.notes||''}));
+  openM(`<h2>¿Importar copia?</h2><p>Se sustituirán los datos actuales por ${inc.length} incidentes de la copia.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" id="okimp">Importar</button></div>`);
+  $('#okimp').onclick=async()=>{S={inc,next:Math.max(+d.next||1,...inc.map(i=>i.id+1),1),notes:Array.isArray(d.notes)?d.notes:[]};await persist();closeM();render();toast('✅ Copia importada')}
+ }catch(e){toast('El archivo no es una copia válida')}};r.readAsText(f);$('#imp').value=''}
+/* ---------- Inicio ---------- */
+try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
+render();load().then(render);
+/* ---------- Modo app: datos protegidos + offline ---------- */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+try{if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js')}catch(e){}
+</script></body></html>
