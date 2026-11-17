@@ -69,18 +69,26 @@ input,select,textarea{width:100%;border:1px solid var(--ln);border-radius:10px;p
 .empty{text-align:center;padding:30px 10px;color:var(--mu)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 
-.wkw{overflow-x:auto;border:1px solid var(--ln);border-radius:14px;background:var(--card)}
-.wk{border-collapse:separate;border-spacing:0;width:100%;min-width:640px}
-.wk th,.wk td{border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);padding:6px 4px;text-align:center;vertical-align:middle;font-size:.82rem}
-.wk th:last-child,.wk td:last-child{border-right:0}
-.wk tr:last-child td{border-bottom:0}
-.wk thead th{background:var(--card);position:sticky;top:0;line-height:1.2}
-.wk th small{display:block;font-weight:400}
-.wk .hr{position:sticky;left:0;z-index:2;background:var(--card);font-weight:800;color:var(--pr);min-width:54px}
-.wk th.tod{background:color-mix(in srgb,var(--pr) 18%,var(--card));color:var(--pr)}
-.wk td.tod{background:color-mix(in srgb,var(--pr) 7%,var(--card))}
-.wk .ce{display:block;width:100%;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);border-radius:8px;padding:3px 2px;margin:2px 0;cursor:pointer;font-size:.8rem;white-space:nowrap}
-.wk tfoot td{font-weight:700;color:var(--mu);background:var(--card)}
+.wkw{overflow-x:auto;border:1px solid var(--ln);border-radius:10px}
+.tb{width:100%;min-width:560px;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.tb th,.tb td{border:1px solid var(--ln);padding:5px 3px;text-align:center;vertical-align:middle}
+.tb th{font-weight:600;line-height:1.3;background:color-mix(in srgb,var(--ln) 40%,var(--card))}
+.tb th small{display:block;font-size:11px;color:var(--mu);font-weight:400}
+.tb .h{width:54px;font-weight:600;color:var(--mu);background:color-mix(in srgb,var(--ln) 40%,var(--card));position:sticky;left:0;z-index:2}
+.tb td{background:var(--card)}
+.tb .hoy{background:color-mix(in srgb,var(--a) 11%,var(--card))}
+.tb th.hoy{color:color-mix(in srgb,var(--a) 75%,var(--tx))}
+.tb .ch{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;border:0;border-radius:6px;padding:3px 4px;margin:2px 0;font-size:12px;white-space:nowrap;cursor:pointer}
+.tb .ch svg{width:14px;height:14px;flex:none}
+.tb .m{background:color-mix(in srgb,var(--a) 18%,var(--card));color:color-mix(in srgb,var(--a) 55%,var(--tx))}
+.tb .p{background:color-mix(in srgb,var(--b) 18%,var(--card));color:color-mix(in srgb,var(--b) 55%,var(--tx))}
+.tb tfoot td{font-weight:600;color:var(--mu);background:color-mix(in srgb,var(--ln) 40%,var(--card))}
+.tb .vac{padding:18px;color:var(--mu)}
+.bar{display:flex;gap:8px;align-items:center;margin:0 0 12px;flex-wrap:wrap}
+.bar button{border:1px solid var(--ln);background:transparent;border-radius:10px;padding:7px 12px;cursor:pointer;font-size:.85rem}
+.bar button.on{background:var(--card);border-color:var(--mu)}
+.lgw{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--mu);flex-wrap:wrap}
+.lgw span{display:flex;align-items:center;gap:4px}.lgw svg{width:14px;height:14px}
 </style></head><body>
 <header><div class="w"><div class="hd"><h1>🐶 Diario de pis y patas</h1><button class="pri" onclick="openForm()">+ Registrar incidente</button></div><nav id="nv"></nav></div></header>
 <main class="w" id="v"></main>
@@ -173,26 +181,30 @@ function vDatos(){return`<div class="card"><h3>Copias y exportación</h3><p><sma
 
 /* ---------- Semana (tabla tipo Excel) ---------- */
 const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-let wk=mk(new Date());
+const IC={pis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C12 3 5.5 10.5 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10.5 12 3 12 3z"/></svg>',
+ patas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="16.5" rx="4.2" ry="3.4"/><circle cx="5.5" cy="11" r="1.7"/><circle cx="9.3" cy="6.6" r="1.7"/><circle cx="14.7" cy="6.6" r="1.7"/><circle cx="18.5" cy="11" r="1.7"/></svg>'};
+let wk=mk(new Date()),semAll=false;
+try{semAll=localStorage.getItem('diario-sem-all')==='1'}catch(e){}
 function wkGo(n){const d=pd(wk);d.setDate(d.getDate()+7*n);wk=dstr(d);render()}
 function wkHoy(){wk=mk(new Date());render()}
+function wkAll(v){semAll=v;try{localStorage.setItem('diario-sem-all',v?'1':'0')}catch(e){}render()}
 function vSem(){
  const td=dstr(new Date()),days=[];
  for(let k=0;k<7;k++){const d=pd(wk);d.setDate(d.getDate()+k);days.push(d)}
- const ds=days.map(dstr),by={};
+ const ds=days.map(dstr),by={},f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1);
  S.inc.forEach(i=>{const k=ds.indexOf(i.date);if(k<0)return;const h=i.time.slice(0,2);(by[h]=by[h]||[[],[],[],[],[],[],[]])[k].push(i)});
- const hs=Object.keys(by).sort();
- const f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1);
- const head=days.map((d,k)=>`<th class="${ds[k]===td?'tod':''}">${DIAS[k]}<small>${f(d)}</small></th>`).join('');
- const body=hs.map(h=>`<tr><td class="hr">${h}:00</td>${by[h].map((L,k)=>`<td class="${ds[k]===td?'tod':''}">${L.sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ce" style="--c:${R[i.r].c}" onclick="openForm(${i.id})">${R[i.r].i} ${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
+ let hs=Object.keys(by).sort();
+ if(semAll){const n=hs.map(Number),lo=Math.min(6,...n),hi=Math.max(23,...n);hs=[];for(let h=lo;h<=hi;h++)hs.push(pad(h))}
+ const head=days.map((d,k)=>`<th class="${ds[k]===td?'hoy':''}">${DIAS[k]}<small>${f(d)}</small></th>`).join('');
+ const none=!Object.keys(by).length;
+ const body=none&&!semAll?`<tr><td class="vac" colspan="8">Sin registros esta semana.</td></tr>`:hs.map(h=>`<tr><td class="h">${h}:00</td>${(by[h]||[[],[],[],[],[],[],[]]).map((L,k)=>`<td class="${ds[k]===td?'hoy':''}">${[...L].sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ch ${i.r==='pis'?'m':'p'}" title="${esc(i.notes)}" onclick="openForm(${i.id})">${IC[i.r]}${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
  const tot=ds.map(x=>S.inc.filter(i=>i.date===x).length);
- const foot=`<tr><td class="hr">Total</td>${tot.map((n,k)=>`<td class="${ds[k]===td?'tod':''}">${n||'–'}</td>`).join('')}</tr>`;
+ const foot=`<tr><td class="h">Total</td>${tot.map(n=>`<td>${n||'–'}</td>`).join('')}</tr>`;
  return`<div class="cn"><button onclick="wkGo(-1)">‹</button><b>Semana ${f(days[0])} – ${f(days[6])}</b><button onclick="wkGo(1)">›</button></div>
- <div class="tg"><button onclick="wkHoy()">Esta semana</button></div>
- ${hs.length?`<div class="wkw"><table class="wk"><thead><tr><th class="hr"></th>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
- <div class="lg"><i style="background:var(--a)"></i>💧 Se ha meado<i style="background:var(--b)"></i>🐾 Se ha chupado las patas</div>
- <small>Cada fila es una hora del día: lo que pasa a la misma hora cae en la misma línea. Toca un registro para editarlo.</small>`
- :`<div class="card empty"><p>No hay registros esta semana.</p></div>`}`}
+ <div class="bar"><button class="${semAll?'':'on'}" onclick="wkAll(false)">Solo horas con registros</button><button class="${semAll?'on':''}" onclick="wkAll(true)">Todas las horas</button><button onclick="wkHoy()" style="margin-left:auto">Esta semana</button></div>
+ <div class="wkw"><table class="tb"><thead><tr><th class="h"></th>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+ <div class="lgw"><span>${IC.pis}Se ha meado</span><span>${IC.patas}Se ha chupado las patas</span></div>
+ <small style="display:block;margin-top:8px">Cada fila es una hora del día: lo que pasa a la misma hora cae en la misma línea. Toca un registro para editarlo.</small>`}
 function render(){$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
  $('#v').innerHTML=({panel:vPanel,hist:vHist,sem:vSem,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
 /* ---------- Formulario y acciones ---------- */
