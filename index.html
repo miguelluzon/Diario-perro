@@ -185,7 +185,7 @@ function vDatos(){return`<div class="card"><h3>Grupo compartido</h3><p>Código: 
 const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 const IC={pis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C12 3 5.5 10.5 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10.5 12 3 12 3z"/></svg>',
  patas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="16.5" rx="4.2" ry="3.4"/><circle cx="5.5" cy="11" r="1.7"/><circle cx="9.3" cy="6.6" r="1.7"/><circle cx="14.7" cy="6.6" r="1.7"/><circle cx="18.5" cy="11" r="1.7"/></svg>'};
-let wk=mk(new Date()),semAll=false,semMes=false,mo={y:new Date().getFullYear(),m:new Date().getMonth()};
+let semFull=false,wk=mk(new Date()),semAll=false,semMes=false,mo={y:new Date().getFullYear(),m:new Date().getMonth()};
 try{semAll=localStorage.getItem('diario-sem-all')==='1';semMes=localStorage.getItem('diario-sem-mes')==='1'}catch(e){}
 function wkGo(n){if(semMes){const x=new Date(mo.y,mo.m+n,1);mo={y:x.getFullYear(),m:x.getMonth()}}else{const d=pd(wk);d.setDate(d.getDate()+7*n);wk=dstr(d)}render()}
 function wkHoy(){const t=new Date();wk=mk(t);mo={y:t.getFullYear(),m:t.getMonth()};render()}
@@ -201,7 +201,7 @@ function semModel(){
  const ds=days.map(dstr),n=days.length,by={},f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1),E=()=>Array.from({length:n},()=>[]);
  S.inc.forEach(i=>{const k=ds.indexOf(i.date);if(k<0)return;const h=i.time.slice(0,2);(by[h]=by[h]||E())[k].push(i)});
  let hs=Object.keys(by).sort();
- if(semAll){const x=hs.map(Number),lo=Math.min(6,...x),hi=Math.max(23,...x);hs=[];for(let h=lo;h<=hi;h++)hs.push(pad(h))}
+ if(semAll){const x=hs.map(Number),lo=semFull?0:Math.min(6,...x),hi=Math.max(23,...x);hs=[];for(let h=lo;h<=hi;h++)hs.push(pad(h))}
  const wd=d=>(d.getDay()+6)%7;
  return{days,ds,n,by,hs,f,E,wd,none:!Object.keys(by).length,
   title:semMes?MES[mo.m]+' '+mo.y:'Semana '+f(days[0])+' – '+f(days[6]),
@@ -269,9 +269,9 @@ const XH='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',XNS='xmlns=
 function xlsxSem(){return{name:(semMes?'mes-'+mo.y+'-'+pad(mo.m+1):'semana-'+wk)+'.xlsx',blob:xlsxBook([[semMes?'Mes':'Semana',sheetXml(semModel(),semMes)]])}}
 function xlsxTodo(){
  const ks=[...new Set(S.inc.map(i=>i.date.slice(0,7)))].sort().reverse();if(!ks.length)return null;
- const sv=[semMes,mo,semAll];semMes=true;semAll=false;
+ const sv=[semMes,mo,semAll];semMes=true;semAll=true;semFull=true;
  const sh=ks.map(k=>{mo={y:+k.slice(0,4),m:+k.slice(5,7)-1};return[MES[mo.m]+' '+mo.y,sheetXml(semModel(),true)]});
- [semMes,mo,semAll]=sv;
+ [semMes,mo,semAll]=sv;semFull=false;
  return{name:'diario-perro-'+dstr(new Date())+'.xlsx',blob:xlsxBook(sh)}}
 function expTodo(){try{const r=xlsxTodo();if(!r){toast('Aún no hay registros');return}dlBlob(r.name,r.blob)}catch(e){toast('No se pudo crear el Excel');console.error(e)}}
 function dlBlob(name,blob){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('✅ Archivo guardado en Descargas')}
