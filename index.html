@@ -89,10 +89,12 @@ input,select,textarea{width:100%;border:1px solid var(--ln);border-radius:10px;p
 .bar button.on{background:var(--card);border-color:var(--mu)}
 .lgw{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--mu);flex-wrap:wrap}
 .lgw span{display:flex;align-items:center;gap:4px}.lgw svg{width:14px;height:14px}
+.st{font-size:.75rem;color:var(--mu);padding:0 0 8px}.st.bad{color:var(--bad)}
 </style></head><body>
-<header><div class="w"><div class="hd"><h1>🐶 Diario de pis y patas</h1><button class="pri" onclick="openForm()">+ Registrar incidente</button></div><nav id="nv"></nav></div></header>
+<header><div class="w"><div class="hd"><h1>🐶 Diario de pis y patas</h1><button class="pri" id="addb" onclick="openForm()">+ Registrar incidente</button></div><nav id="nv"></nav><div id="st" class="st"></div></div></header>
 <main class="w" id="v"></main>
 <div class="mo" id="mo" hidden></div><div id="ts"></div>
+<script src="fb.js"></script>
 <script>
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
 const R={pis:{n:'Se ha meado',c:'var(--a)',i:'💧',k:'a'},patas:{n:'Se ha chupado las patas',c:'var(--b)',i:'🐾',k:'b'}};
@@ -153,7 +155,7 @@ function vPanel(){const I=S.inc;if(!I.length)return`<div class="card empty"><div
  <div class="card"><h3>Por día de la semana</h3>${chart(DOW,wd[0],wd[1])}</div>
  <div class="card"><h3>Por horas</h3>${chart(hrs.map(h=>pad(h)),H.map(h=>h.a),H.map(h=>h.b),3)}</div>
  <div class="card" style="grid-column:1/-1"><h3>Evolución</h3><div class="tg"><button class="${evo==='w'?'on':''}" onclick="evo='w';render()">Semanal</button><button class="${evo==='m'?'on':''}" onclick="evo='m';render()">Mensual</button></div>${ev}</div></div>`}
-function row(i,g){const r=R[i.r];return`<div class="it"><div class="no">#${i.id}</div><div class="bd"><div><span class="tag" style="--c:${r.c}">${r.i} ${r.n}</span> <b>${fd(i.date)}</b> · ${i.time}</div>${i.notes?`<p>${esc(i.notes)}</p>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div><div class="ac"><button onclick="openForm(${i.id})" title="Editar">✏️</button><button onclick="del(${i.id})" title="Eliminar">🗑️</button></div></div>`}
+function row(i,g){const r=R[i.r];return`<div class="it"><div class="no">#${i.id}</div><div class="bd"><div><span class="tag" style="--c:${r.c}">${r.i} ${r.n}</span> <b>${fd(i.date)}</b> · ${i.time}</div>${i.notes?`<p>${esc(i.notes)}</p>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div><div class="ac"><button onclick="openForm('${i.key}')" title="Editar">✏️</button><button onclick="del('${i.key}')" title="Eliminar">🗑️</button></div></div>`}
 function filt(){const q=F.q.toLowerCase();return sorted().filter(i=>(!F.m||i.r===F.m)&&(!F.day||i.date===F.day)&&(!F.from||i.date>=F.from)&&(!F.to||i.date<=F.to)&&(!q||`#${i.id} ${R[i.r].n} ${i.notes} ${fd(i.date)} ${i.time}`.toLowerCase().includes(q)))}
 function hlist(){const l=filt(),g=gaps();return`<small>${l.length} de ${S.inc.length} registros</small><div style="margin-top:8px">${l.length?l.map(i=>row(i,g)).join(''):'<div class="empty">No hay registros con estos filtros.</div>'}</div>`}
 function setF(k,v){F[k]=v;$('#hl').innerHTML=hlist()}
@@ -171,11 +173,11 @@ function vCal(){const{y,m}=cal,off=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y
 function calGo(d){const x=new Date(cal.y,cal.m+d,1);cal.y=x.getFullYear();cal.m=x.getMonth();render()}
 function vTl(){if(!S.inc.length)return'<div class="empty">Aún no hay incidentes.</div>';const g=gaps();let h='',last='';
  sorted().forEach(i=>{if(i.date!==last){last=i.date;h+=`</div><div class="dg">${fd(i.date)}</div><div class="tl">`}
-  h+=`<div class="te" style="--c:${R[i.r].c}" onclick="openForm(${i.id})"><b>${i.time}</b> · #${i.id} <span class="tag" style="--c:${R[i.r].c}">${R[i.r].i} ${R[i.r].n}</span>${i.notes?`<div>${esc(i.notes)}</div>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div>`});
+  h+=`<div class="te" style="--c:${R[i.r].c}" onclick="openForm('${i.key}')"><b>${i.time}</b> · #${i.id} <span class="tag" style="--c:${R[i.r].c}">${R[i.r].i} ${R[i.r].n}</span>${i.notes?`<div>${esc(i.notes)}</div>`:''}<small>⏱ ${g[i.id]==null?'Primer registro':el(g[i.id])+' desde el anterior'}</small></div>`});
  return h.slice(6)+'</div>'}
 function vNotas(){return`<label>Nota general sobre el comportamiento<textarea id="nt" rows="3" placeholder="Ej.: se pone nervioso cuando suena el timbre…"></textarea></label><div class="row"><button class="pri" onclick="addNote()">Guardar nota</button></div>
- ${[...S.notes].reverse().map(n=>`<div class="it"><div class="bd"><small>${fd(n.date)}</small><p>${esc(n.text)}</p></div><div class="ac"><button onclick="delNote(${n.id})">🗑️</button></div></div>`).join('')||'<div class="empty">No hay notas.</div>'}`}
-function vDatos(){return`<div class="card"><h3>Copias y exportación</h3><p><small>Los datos se guardan en este navegador (IndexedDB) y siguen ahí al cerrar la página o apagar el equipo. Si borras los datos del navegador se perderían: descarga copias de vez en cuando.</small></p>
+ ${[...S.notes].reverse().map(n=>`<div class="it"><div class="bd"><small>${fd(n.date)}</small><p>${esc(n.text)}</p></div><div class="ac"><button onclick="delNote('${n.id}')">🗑️</button></div></div>`).join('')||'<div class="empty">No hay notas.</div>'}`}
+function vDatos(){return`<div class="card"><h3>Grupo compartido</h3><p>Código: <b>${gfmt(G)}</b></p><p><small>Quien tenga este código puede ver, apuntar y borrar registros. Compártelo solo con quien quieras.</small></p><div class="row"><button class="sec" onclick="compartir()">🔗 Compartir enlace</button><button class="sec" onclick="salirGrupo()">Salir del grupo</button></div></div>\n<div class="card"><h3>Copias y exportación</h3><p><small>Los datos se guardan en la nube del grupo y también en este móvil, así que puedes apuntar sin conexión y se sincroniza al volver. Descarga copias de vez en cuando por seguridad.</small></p>
  <div class="row"><button class="sec" onclick="expCSV()">⬇️ Exportar a CSV (Excel)</button><button class="sec" onclick="expJSON()">⬇️ Copia de seguridad (JSON)</button><button class="sec" onclick="$('#imp').click()">⬆️ Importar copia</button></div>
  <input type="file" id="imp" accept=".json,application/json" hidden onchange="imp(this.files[0])"></div>`}
 
@@ -207,7 +209,7 @@ function semModel(){
 function vSem(){
  const M=semModel(),td=dstr(new Date()),{days,ds,n,by,hs,f,E,wd}=M;
  const head=days.map((d,k)=>`<th class="${ds[k]===td?'hoy':''}">${semMes?DOW[wd(d)]:DIAS[wd(d)]}<small>${f(d)}</small></th>`).join('');
- const body=M.none&&!semAll?`<tr><td class="vac" colspan="${n+1}">${semMes?'Sin registros este mes.':'Sin registros esta semana.'}</td></tr>`:hs.map(h=>`<tr><td class="h">${h}:00</td>${(by[h]||E()).map((L,k)=>`<td class="${ds[k]===td?'hoy':''}">${[...L].sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ch ${i.r==='pis'?'m':'p'}" title="${esc(i.notes)}" onclick="openForm(${i.id})">${IC[i.r]}${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
+ const body=M.none&&!semAll?`<tr><td class="vac" colspan="${n+1}">${semMes?'Sin registros este mes.':'Sin registros esta semana.'}</td></tr>`:hs.map(h=>`<tr><td class="h">${h}:00</td>${(by[h]||E()).map((L,k)=>`<td class="${ds[k]===td?'hoy':''}">${[...L].sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ch ${i.r==='pis'?'m':'p'}" title="${esc(i.notes)}" onclick="openForm('${i.key}')">${IC[i.r]}${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
  const foot=`<tr><td class="h">Total</td>${M.tot.map(x=>`<td>${x||'–'}</td>`).join('')}</tr>`;
  const mw=54+n*(semMes?66:80);
  return`<div class="cn"><button onclick="wkGo(-1)">‹</button><b>${M.title}</b><button onclick="wkGo(1)">›</button></div>
@@ -223,26 +225,30 @@ function expSem(){
  hs.forEach(h=>rows.push([q(h+':00'),...(by[h]||E()).map(L=>q([...L].sort((a,b)=>a.time<b.time?-1:1).map(lab).join('\n')))].join(';')));
  rows.push([q('Total'),...M.tot.map(x=>x||'')].join(';'));
  saveFile((semMes?'mes-'+mo.y+'-'+pad(mo.m+1):'semana-'+wk)+'.csv','\uFEFF'+rows.join('\r\n'))}
-function render(){$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
+function render(){$('#addb').hidden=!G;if(!G){$('#nv').innerHTML='';$('#v').innerHTML=vJoin();return}
+$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
  $('#v').innerHTML=({panel:vPanel,hist:vHist,sem:vSem,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
 /* ---------- Formulario y acciones ---------- */
 function openM(h){const m=$('#mo');m.innerHTML=`<div class="dlg">${h}</div>`;m.hidden=false}
 function closeM(){$('#mo').hidden=true}
 $('#mo').addEventListener('click',e=>{if(e.target.id==='mo')closeM()});
-function openForm(id,date){const e=id?S.inc.find(i=>i.id===id):null,n=new Date(),r=e?e.r:'pis';
+function openForm(key,date){const e=key?S.inc.find(i=>i.key===key):null,n=new Date(),r=e?e.r:'pis';
  openM(`<h2>${e?'Editar incidente':'Registrar incidente'} <span class="no">#${e?e.id:S.next}</span></h2>
  <div class="g"><label>Fecha<input type="date" id="fdt" value="${e?e.date:date||dstr(n)}"></label><label>Hora<input type="time" id="fhr" value="${e?e.time:tstr(n)}"></label></div>
  <label>Motivo</label><div class="rs"><label class="rd"><input type="radio" name="fr" value="pis" ${r==='pis'?'checked':''}><span class="a">💧 Se ha meado</span></label><label class="rd"><input type="radio" name="fr" value="patas" ${r==='patas'?'checked':''}><span class="b">🐾 Se ha chupado las patas</span></label></div>
  <label>Observaciones<textarea id="fob" rows="3" placeholder="Detalles adicionales (opcional)">${e?esc(e.notes):''}</textarea></label>
- <div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" onclick="saveInc(${e?e.id:0})">Guardar</button></div>`)}
-async function saveInc(id){const date=$('#fdt').value,time=$('#fhr').value,r=document.querySelector('input[name=fr]:checked').value,notes=$('#fob').value.trim();
+ <div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" onclick="saveInc('${e?e.key:''}')">Guardar</button></div>`)}
+function W(p){return p.catch(e=>toast('No se pudo guardar en la nube: '+(e.code||e.message)))}
+function saveInc(key){const date=$('#fdt').value,time=$('#fhr').value,r=document.querySelector('input[name=fr]:checked').value,notes=$('#fob').value.trim();
  if(!date||!time){toast('Indica fecha y hora');return}
- let n;if(id){const e=S.inc.find(i=>i.id===id);Object.assign(e,{date,time,r,notes});n=id}else{n=S.next++;S.inc.push({id:n,date,time,r,notes})}
- await persist();closeM();cal.sel=date;render();toast(`✅ Incidente #${n} guardado`)}
-function del(id){openM(`<h2>¿Eliminar el incidente #${id}?</h2><p>Esta acción no se puede deshacer. El número #${id} no se volverá a usar.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" style="background:var(--bad)" onclick="doDel(${id})">Eliminar</button></div>`)}
-async function doDel(id){S.inc=S.inc.filter(i=>i.id!==id);await persist();closeM();render();toast('🗑️ Incidente eliminado')}
-async function addNote(){const t=$('#nt').value.trim();if(!t)return;S.notes.push({id:Date.now(),date:dstr(new Date()),text:t});await persist();render();toast('✅ Nota guardada')}
-async function delNote(id){S.notes=S.notes.filter(n=>n.id!==id);await persist();render()}
+ if(!FS){toast('La nube no está lista');return}
+ const dt={date,time,r,notes};
+ if(key)W(FB.setDoc(FB.doc(colI(),key),dt,{merge:true}));else W(FB.setDoc(FB.doc(colI()),{...dt,createdAt:Date.now(),del:false}));
+ closeM();cal.sel=date;toast('✅ Incidente guardado')}
+function del(key){const e=S.inc.find(i=>i.key===key),id=e?e.id:'';openM(`<h2>¿Eliminar el incidente #${id}?</h2><p>Esta acción no se puede deshacer y se borra para todo el grupo. El número #${id} no se volverá a usar.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" style="background:var(--bad)" onclick="doDel('${key}')">Eliminar</button></div>`)}
+function doDel(key){W(FB.setDoc(FB.doc(colI(),key),{del:true},{merge:true}));closeM();toast('🗑️ Incidente eliminado')}
+function addNote(){const t=$('#nt').value.trim();if(!t||!FS)return;W(FB.setDoc(FB.doc(colN()),{date:dstr(new Date()),text:t,createdAt:Date.now(),del:false}));$('#nt').value='';toast('✅ Nota guardada')}
+function delNote(key){W(FB.setDoc(FB.doc(colN(),key),{del:true},{merge:true}))}
 /* ---------- Exportar / importar ---------- */
 function saveFile(name,data){const fb=()=>openM(`<h2>Copia el contenido</h2><p><small>No se puede descargar directamente aquí. Copia el texto y guárdalo como ${name}.</small></p><textarea rows="10" readonly onfocus="this.select()">${esc(data)}</textarea><div class="bt"><button class="sec" onclick="closeM()">Cerrar</button></div>`);
  if(!DL){try{const b=new Blob([data],{type:name.endsWith('.json')?'application/json':'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('✅ Archivo guardado en Descargas');return}catch(e){return fb()}}DL.save({filename:name,data}).then(()=>toast('✅ Archivo guardado')).catch(e=>{if(e&&e.code!=='declined')fb()})}
@@ -250,13 +256,54 @@ function expCSV(){const g=gaps(),q=v=>'"'+String(v).replace(/"/g,'""')+'"',rows=
  saveFile('incidentes-perro.csv','\uFEFF'+['Número;Fecha;Hora;Motivo;Observaciones;Tiempo desde el anterior',...rows].join('\r\n'))}
 function expJSON(){saveFile('copia-diario-perro-'+dstr(new Date())+'.json',JSON.stringify({app:'diario-perro',version:1,...S},null,1))}
 function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.inc))throw 0;
-  const inc=d.inc.filter(i=>i&&R[i.r]&&i.date&&i.time).map(i=>({id:+i.id,date:i.date,time:i.time,r:i.r,notes:i.notes||''}));
-  openM(`<h2>¿Importar copia?</h2><p>Se sustituirán los datos actuales por ${inc.length} incidentes de la copia.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" id="okimp">Importar</button></div>`);
-  $('#okimp').onclick=async()=>{S={inc,next:Math.max(+d.next||1,...inc.map(i=>i.id+1),1),notes:Array.isArray(d.notes)?d.notes:[]};await persist();closeM();render();toast('✅ Copia importada')}
+  const inc=d.inc.filter(i=>i&&R[i.r]&&i.date&&i.time).map(i=>({id:+i.id||0,date:i.date,time:i.time,r:i.r,notes:i.notes||''})),nts=(Array.isArray(d.notes)?d.notes:[]).filter(n=>n&&n.text);
+  openM(`<h2>¿Importar copia?</h2><p>Se añadirán ${inc.length} incidentes de la copia al grupo. No se borra nada de lo que ya hay.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" id="okimp">Importar</button></div>`);
+  $('#okimp').onclick=()=>{upload(inc,nts);closeM();toast('✅ Copia importada')}
  }catch(e){toast('El archivo no es una copia válida')}};r.readAsText(f);$('#imp').value=''}
+/* ---------- Nube compartida (Firebase) ---------- */
+const CFG={apiKey:"AIzaSyC-Lno1dskuEG_FkwoBrWq_6rWC3edDPhg",authDomain:"diario-perro.firebaseapp.com",projectId:"diario-perro",storageBucket:"diario-perro.firebasestorage.app",messagingSenderId:"1069759559741",appId:"1:1069759559741:web:5e377e063904561cbcd254"};
+let G=null,FS=null,RAW={i:[],n:[]},LEG=[],LEGN=[],unsub=[],ST={off:false,pend:false},ready={};
+const cyrb=t=>{let a=3735928559,b=1103547991;for(let i=0,c;i<t.length;i++){c=t.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^a>>>16,2246822507)^Math.imul(b^b>>>13,3266489909);b=Math.imul(b^b>>>16,2246822507)^Math.imul(a^a>>>13,3266489909);return(4294967296*(2097151&b)+(a>>>0)).toString(36)};
+const gcode=c=>String(c||'').toLowerCase().replace(/[^a-z0-9]/g,''),gfmt=c=>c.replace(/(.{4})(?=.)/g,'$1-');
+const colI=()=>FB.collection(FS,'grupos',G,'incidentes'),colN=()=>FB.collection(FS,'grupos',G,'notas');
+function newCode(){const A='abcdefghjkmnpqrstuvwxyz23456789';return[...crypto.getRandomValues(new Uint8Array(16))].map(x=>A[x%A.length]).join('')}
+function stat(msg,bad){const e=$('#st');if(!e)return;e.className='st'+(bad?' bad':'');e.textContent=msg||(G?(ST.off?'☁️ Sin conexión · se sincronizará al volver':ST.pend?'☁️ Sincronizando…':'☁️ Sincronizado'):'')}
+function rebuild(){
+ const all=[...RAW.i].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)||(a.key<b.key?-1:1));
+ all.forEach((x,k)=>{x.id=k+1});
+ S.inc=all.filter(x=>!x.del&&R[x.r]&&x.date&&x.time);S.next=all.length+1;
+ S.notes=RAW.n.filter(n=>!n.del).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).map(n=>({id:n.key,date:n.date,text:n.text}))}
+function startCloud(){
+ if(typeof FB==='undefined'){stat('No se pudo cargar la nube (falta fb.js)',1);return}
+ try{if(!FS){const app=FB.initializeApp(CFG);FS=FB.initializeFirestore(app,{localCache:FB.persistentLocalCache({tabManager:FB.persistentMultipleTabManager()})})}}catch(e){stat('Error al iniciar la nube: '+e.message,1);return}
+ unsub.forEach(f=>f());unsub=[];ready={};RAW={i:[],n:[]};
+ const er=e=>stat(e.code==='permission-denied'?'Sin permiso: publica las reglas de Firestore':'Error de la nube ('+(e.code||e.message)+')',1);
+ const h=k=>snap=>{if(k==='i'){ST.off=snap.metadata.fromCache;ST.pend=snap.metadata.hasPendingWrites}
+  if(snap.docChanges().length||!ready[k]){ready[k]=1;RAW[k]=snap.docs.map(d=>({key:d.id,...d.data()}));rebuild();render()}stat()};
+ const o={includeMetadataChanges:true};
+ unsub.push(FB.onSnapshot(colI(),o,h('i'),er),FB.onSnapshot(colN(),o,h('n'),er));stat()}
+function setGroup(c){G=c;try{localStorage.setItem('diario-grupo',c)}catch(e){}startCloud();render();checkLegacy()}
+function crearGrupo(){setGroup(newCode())}
+function unirse(){const c=gcode($('#gc').value);if(c.length<12){toast('Ese código no parece completo');return}setGroup(c)}
+function vJoin(){return`<div class="card"><h3>Diario compartido</h3><p>Todos los móviles con el mismo código ven y apuntan en el mismo diario.</p><div class="row"><button class="pri" onclick="crearGrupo()">Crear un grupo nuevo</button></div></div>
+ <div class="card"><h3>Ya tengo un código</h3><label>Código del grupo<input id="gc" autocomplete="off" autocapitalize="none" placeholder="abcd-efgh-ijkl-mnop"></label><div class="row" style="margin-top:8px"><button class="sec" onclick="unirse()">Unirme</button></div></div>`}
+function compartir(){const u=location.origin+location.pathname+'#g='+G;
+ if(navigator.share){navigator.share({title:'Diario de pis y patas',text:'Únete al diario del perro',url:u}).catch(()=>{})}
+ else{try{navigator.clipboard.writeText(u);toast('🔗 Enlace copiado')}catch(e){openM(`<h2>Enlace del grupo</h2><textarea rows="3" readonly onfocus="this.select()">${esc(u)}</textarea><div class="bt"><button class="sec" onclick="closeM()">Cerrar</button></div>`)}}}
+function salirGrupo(){openM(`<h2>¿Salir del grupo?</h2><p>Este móvil dejará de ver el diario. Los datos siguen en la nube y puedes volver a entrar con el código <b>${gfmt(G)}</b>. Apúntalo antes.</p><div class="bt"><button class="sec" onclick="closeM()">Cancelar</button><button class="pri" onclick="doSalir()">Salir</button></div>`)}
+function doSalir(){try{localStorage.removeItem('diario-grupo')}catch(e){}location.reload()}
+function upload(inc,nts){if(!FS)return;const used={};
+ inc.forEach(i=>{let k='m'+cyrb(`${i.date}|${i.time}|${i.r}|${i.notes}`);used[k]=(used[k]||0)+1;if(used[k]>1)k+='-'+used[k];W(FB.setDoc(FB.doc(colI(),k),{date:i.date,time:i.time,r:i.r,notes:i.notes||'',createdAt:+i.id||0,del:false},{merge:true}))});
+ (nts||[]).forEach(n=>W(FB.setDoc(FB.doc(colN(),'n'+cyrb(`${n.date}|${n.text}`)),{date:n.date||dstr(new Date()),text:n.text,createdAt:+n.id||0,del:false},{merge:true})))}
+function checkLegacy(){if(!LEG.length&&!LEGN.length)return;try{if(localStorage.getItem('diario-mig-'+G))return}catch(e){}
+ openM(`<h2>Datos de este móvil</h2><p>Hay ${LEG.length} registros guardados solo en este móvil. ¿Los subo al grupo para que los vean todos?</p><div class="bt"><button class="sec" onclick="migrar(false)">Ahora no</button><button class="pri" onclick="migrar(true)">Subir</button></div>`)}
+function migrar(si){try{localStorage.setItem('diario-mig-'+G,'1')}catch(e){}if(si){upload(LEG,LEGN);toast('⬆️ Subiendo datos…')}closeM()}
 /* ---------- Inicio ---------- */
 try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
-render();load().then(render);
+render();
+(async()=>{await load();LEG=S.inc.slice();LEGN=S.notes.slice();S={inc:[],next:1,notes:[]};
+ let c=null;try{const m=location.hash.match(/g=([a-z0-9-]+)/i);if(m){c=gcode(m[1]);history.replaceState(null,'',location.pathname);localStorage.setItem('diario-grupo',c)}else c=localStorage.getItem('diario-grupo')}catch(e){}
+ if(c&&c.length>=12){G=c;startCloud();checkLegacy()}render()})();
 /* ---------- Modo app: datos protegidos + offline ---------- */
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 try{if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js')}catch(e){}
