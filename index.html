@@ -68,6 +68,19 @@ input,select,textarea{width:100%;border:1px solid var(--ln);border-radius:10px;p
 #ts{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ok);color:#fff;padding:10px 18px;border-radius:999px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw}#ts.on{opacity:1}
 .empty{text-align:center;padding:30px 10px;color:var(--mu)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+
+.wkw{overflow-x:auto;border:1px solid var(--ln);border-radius:14px;background:var(--card)}
+.wk{border-collapse:separate;border-spacing:0;width:100%;min-width:640px}
+.wk th,.wk td{border-bottom:1px solid var(--ln);border-right:1px solid var(--ln);padding:6px 4px;text-align:center;vertical-align:middle;font-size:.82rem}
+.wk th:last-child,.wk td:last-child{border-right:0}
+.wk tr:last-child td{border-bottom:0}
+.wk thead th{background:var(--card);position:sticky;top:0;line-height:1.2}
+.wk th small{display:block;font-weight:400}
+.wk .hr{position:sticky;left:0;z-index:2;background:var(--card);font-weight:800;color:var(--pr);min-width:54px}
+.wk th.tod{background:color-mix(in srgb,var(--pr) 18%,var(--card));color:var(--pr)}
+.wk td.tod{background:color-mix(in srgb,var(--pr) 7%,var(--card))}
+.wk .ce{display:block;width:100%;border:1px solid var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);border-radius:8px;padding:3px 2px;margin:2px 0;cursor:pointer;font-size:.8rem;white-space:nowrap}
+.wk tfoot td{font-weight:700;color:var(--mu);background:var(--card)}
 </style></head><body>
 <header><div class="w"><div class="hd"><h1>🐶 Diario de pis y patas</h1><button class="pri" onclick="openForm()">+ Registrar incidente</button></div><nav id="nv"></nav></div></header>
 <main class="w" id="v"></main>
@@ -76,7 +89,7 @@ input,select,textarea{width:100%;border:1px solid var(--ln);border-radius:10px;p
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
 const R={pis:{n:'Se ha meado',c:'var(--a)',i:'💧',k:'a'},patas:{n:'Se ha chupado las patas',c:'var(--b)',i:'🐾',k:'b'}};
 const DOW=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],MS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-const TABS=[['panel','📊 Panel'],['hist','📋 Historial'],['cal','📅 Calendario'],['tl','🕒 Cronología'],['notas','📝 Notas'],['datos','💾 Datos']];
+const TABS=[['panel','📊 Panel'],['hist','📋 Historial'],['sem','🗓️ Semana'],['cal','📅 Calendario'],['tl','🕒 Cronología'],['notas','📝 Notas'],['datos','💾 Datos']];
 let S={inc:[],next:1,notes:[]},tab='panel',F={q:'',m:'',day:'',from:'',to:''},evo='w',DL=null,db=null;
 const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),tstr=d=>pad(d.getHours())+':'+pad(d.getMinutes());
 const pd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
@@ -157,8 +170,31 @@ function vNotas(){return`<label>Nota general sobre el comportamiento<textarea id
 function vDatos(){return`<div class="card"><h3>Copias y exportación</h3><p><small>Los datos se guardan en este navegador (IndexedDB) y siguen ahí al cerrar la página o apagar el equipo. Si borras los datos del navegador se perderían: descarga copias de vez en cuando.</small></p>
  <div class="row"><button class="sec" onclick="expCSV()">⬇️ Exportar a CSV (Excel)</button><button class="sec" onclick="expJSON()">⬇️ Copia de seguridad (JSON)</button><button class="sec" onclick="$('#imp').click()">⬆️ Importar copia</button></div>
  <input type="file" id="imp" accept=".json,application/json" hidden onchange="imp(this.files[0])"></div>`}
+
+/* ---------- Semana (tabla tipo Excel) ---------- */
+const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+let wk=mk(new Date());
+function wkGo(n){const d=pd(wk);d.setDate(d.getDate()+7*n);wk=dstr(d);render()}
+function wkHoy(){wk=mk(new Date());render()}
+function vSem(){
+ const td=dstr(new Date()),days=[];
+ for(let k=0;k<7;k++){const d=pd(wk);d.setDate(d.getDate()+k);days.push(d)}
+ const ds=days.map(dstr),by={};
+ S.inc.forEach(i=>{const k=ds.indexOf(i.date);if(k<0)return;const h=i.time.slice(0,2);(by[h]=by[h]||[[],[],[],[],[],[],[]])[k].push(i)});
+ const hs=Object.keys(by).sort();
+ const f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1);
+ const head=days.map((d,k)=>`<th class="${ds[k]===td?'tod':''}">${DIAS[k]}<small>${f(d)}</small></th>`).join('');
+ const body=hs.map(h=>`<tr><td class="hr">${h}:00</td>${by[h].map((L,k)=>`<td class="${ds[k]===td?'tod':''}">${L.sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ce" style="--c:${R[i.r].c}" onclick="openForm(${i.id})">${R[i.r].i} ${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
+ const tot=ds.map(x=>S.inc.filter(i=>i.date===x).length);
+ const foot=`<tr><td class="hr">Total</td>${tot.map((n,k)=>`<td class="${ds[k]===td?'tod':''}">${n||'–'}</td>`).join('')}</tr>`;
+ return`<div class="cn"><button onclick="wkGo(-1)">‹</button><b>Semana ${f(days[0])} – ${f(days[6])}</b><button onclick="wkGo(1)">›</button></div>
+ <div class="tg"><button onclick="wkHoy()">Esta semana</button></div>
+ ${hs.length?`<div class="wkw"><table class="wk"><thead><tr><th class="hr"></th>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+ <div class="lg"><i style="background:var(--a)"></i>💧 Se ha meado<i style="background:var(--b)"></i>🐾 Se ha chupado las patas</div>
+ <small>Cada fila es una hora del día: lo que pasa a la misma hora cae en la misma línea. Toca un registro para editarlo.</small>`
+ :`<div class="card empty"><p>No hay registros esta semana.</p></div>`}`}
 function render(){$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
- $('#v').innerHTML=({panel:vPanel,hist:vHist,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
+ $('#v').innerHTML=({panel:vPanel,hist:vHist,sem:vSem,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
 /* ---------- Formulario y acciones ---------- */
 function openM(h){const m=$('#mo');m.innerHTML=`<div class="dlg">${h}</div>`;m.hidden=false}
 function closeM(){$('#mo').hidden=true}
