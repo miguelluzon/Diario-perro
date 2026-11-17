@@ -179,32 +179,50 @@ function vDatos(){return`<div class="card"><h3>Copias y exportación</h3><p><sma
  <div class="row"><button class="sec" onclick="expCSV()">⬇️ Exportar a CSV (Excel)</button><button class="sec" onclick="expJSON()">⬇️ Copia de seguridad (JSON)</button><button class="sec" onclick="$('#imp').click()">⬆️ Importar copia</button></div>
  <input type="file" id="imp" accept=".json,application/json" hidden onchange="imp(this.files[0])"></div>`}
 
-/* ---------- Semana (tabla tipo Excel) ---------- */
+/* ---------- Semana / Mes (tabla tipo Excel) ---------- */
 const DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 const IC={pis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C12 3 5.5 10.5 5.5 15a6.5 6.5 0 0 0 13 0C18.5 10.5 12 3 12 3z"/></svg>',
  patas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="16.5" rx="4.2" ry="3.4"/><circle cx="5.5" cy="11" r="1.7"/><circle cx="9.3" cy="6.6" r="1.7"/><circle cx="14.7" cy="6.6" r="1.7"/><circle cx="18.5" cy="11" r="1.7"/></svg>'};
-let wk=mk(new Date()),semAll=false;
-try{semAll=localStorage.getItem('diario-sem-all')==='1'}catch(e){}
-function wkGo(n){const d=pd(wk);d.setDate(d.getDate()+7*n);wk=dstr(d);render()}
-function wkHoy(){wk=mk(new Date());render()}
+let wk=mk(new Date()),semAll=false,semMes=false,mo={y:new Date().getFullYear(),m:new Date().getMonth()};
+try{semAll=localStorage.getItem('diario-sem-all')==='1';semMes=localStorage.getItem('diario-sem-mes')==='1'}catch(e){}
+function wkGo(n){if(semMes){const x=new Date(mo.y,mo.m+n,1);mo={y:x.getFullYear(),m:x.getMonth()}}else{const d=pd(wk);d.setDate(d.getDate()+7*n);wk=dstr(d)}render()}
+function wkHoy(){const t=new Date();wk=mk(t);mo={y:t.getFullYear(),m:t.getMonth()};render()}
 function wkAll(v){semAll=v;try{localStorage.setItem('diario-sem-all',v?'1':'0')}catch(e){}render()}
-function vSem(){
- const td=dstr(new Date()),days=[];
- for(let k=0;k<7;k++){const d=pd(wk);d.setDate(d.getDate()+k);days.push(d)}
- const ds=days.map(dstr),by={},f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1);
- S.inc.forEach(i=>{const k=ds.indexOf(i.date);if(k<0)return;const h=i.time.slice(0,2);(by[h]=by[h]||[[],[],[],[],[],[],[]])[k].push(i)});
+function wkMes(v){
+ if(v&&!semMes){const d=pd(wk);d.setDate(d.getDate()+3);mo={y:d.getFullYear(),m:d.getMonth()}}
+ if(!v&&semMes){const t=new Date();wk=(t.getFullYear()===mo.y&&t.getMonth()===mo.m)?mk(t):mk(new Date(mo.y,mo.m,1))}
+ semMes=v;try{localStorage.setItem('diario-sem-mes',v?'1':'0')}catch(e){}render()}
+function semModel(){
+ const days=[];
+ if(semMes){const dim=new Date(mo.y,mo.m+1,0).getDate();for(let d=1;d<=dim;d++)days.push(new Date(mo.y,mo.m,d))}
+ else for(let k=0;k<7;k++){const d=pd(wk);d.setDate(d.getDate()+k);days.push(d)}
+ const ds=days.map(dstr),n=days.length,by={},f=d=>pad(d.getDate())+'/'+pad(d.getMonth()+1),E=()=>Array.from({length:n},()=>[]);
+ S.inc.forEach(i=>{const k=ds.indexOf(i.date);if(k<0)return;const h=i.time.slice(0,2);(by[h]=by[h]||E())[k].push(i)});
  let hs=Object.keys(by).sort();
- if(semAll){const n=hs.map(Number),lo=Math.min(6,...n),hi=Math.max(23,...n);hs=[];for(let h=lo;h<=hi;h++)hs.push(pad(h))}
- const head=days.map((d,k)=>`<th class="${ds[k]===td?'hoy':''}">${DIAS[k]}<small>${f(d)}</small></th>`).join('');
- const none=!Object.keys(by).length;
- const body=none&&!semAll?`<tr><td class="vac" colspan="8">Sin registros esta semana.</td></tr>`:hs.map(h=>`<tr><td class="h">${h}:00</td>${(by[h]||[[],[],[],[],[],[],[]]).map((L,k)=>`<td class="${ds[k]===td?'hoy':''}">${[...L].sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ch ${i.r==='pis'?'m':'p'}" title="${esc(i.notes)}" onclick="openForm(${i.id})">${IC[i.r]}${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
- const tot=ds.map(x=>S.inc.filter(i=>i.date===x).length);
- const foot=`<tr><td class="h">Total</td>${tot.map(n=>`<td>${n||'–'}</td>`).join('')}</tr>`;
- return`<div class="cn"><button onclick="wkGo(-1)">‹</button><b>Semana ${f(days[0])} – ${f(days[6])}</b><button onclick="wkGo(1)">›</button></div>
- <div class="bar"><button class="${semAll?'':'on'}" onclick="wkAll(false)">Solo horas con registros</button><button class="${semAll?'on':''}" onclick="wkAll(true)">Todas las horas</button><button onclick="wkHoy()" style="margin-left:auto">Esta semana</button></div>
- <div class="wkw"><table class="tb"><thead><tr><th class="h"></th>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+ if(semAll){const x=hs.map(Number),lo=Math.min(6,...x),hi=Math.max(23,...x);hs=[];for(let h=lo;h<=hi;h++)hs.push(pad(h))}
+ const wd=d=>(d.getDay()+6)%7;
+ return{days,ds,n,by,hs,f,E,wd,none:!Object.keys(by).length,
+  title:semMes?MES[mo.m]+' '+mo.y:'Semana '+f(days[0])+' – '+f(days[6]),
+  tot:ds.map(x=>S.inc.filter(i=>i.date===x).length)}}
+function vSem(){
+ const M=semModel(),td=dstr(new Date()),{days,ds,n,by,hs,f,E,wd}=M;
+ const head=days.map((d,k)=>`<th class="${ds[k]===td?'hoy':''}">${semMes?DOW[wd(d)]:DIAS[wd(d)]}<small>${f(d)}</small></th>`).join('');
+ const body=M.none&&!semAll?`<tr><td class="vac" colspan="${n+1}">${semMes?'Sin registros este mes.':'Sin registros esta semana.'}</td></tr>`:hs.map(h=>`<tr><td class="h">${h}:00</td>${(by[h]||E()).map((L,k)=>`<td class="${ds[k]===td?'hoy':''}">${[...L].sort((a,b)=>a.time<b.time?-1:1).map(i=>`<button class="ch ${i.r==='pis'?'m':'p'}" title="${esc(i.notes)}" onclick="openForm(${i.id})">${IC[i.r]}${i.time}</button>`).join('')}</td>`).join('')}</tr>`).join('');
+ const foot=`<tr><td class="h">Total</td>${M.tot.map(x=>`<td>${x||'–'}</td>`).join('')}</tr>`;
+ const mw=54+n*(semMes?66:80);
+ return`<div class="cn"><button onclick="wkGo(-1)">‹</button><b>${M.title}</b><button onclick="wkGo(1)">›</button></div>
+ <div class="bar"><button class="${semMes?'':'on'}" onclick="wkMes(false)">Semana</button><button class="${semMes?'on':''}" onclick="wkMes(true)">Mes</button><button onclick="wkHoy()" style="margin-left:auto">${semMes?'Este mes':'Esta semana'}</button><button onclick="expSem()">⬇️ Descargar (Excel)</button></div>
+ <div class="bar"><button class="${semAll?'':'on'}" onclick="wkAll(false)">Solo horas con registros</button><button class="${semAll?'on':''}" onclick="wkAll(true)">Todas las horas</button></div>
+ <div class="wkw"><table class="tb" style="min-width:${mw}px"><thead><tr><th class="h"></th>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
  <div class="lgw"><span>${IC.pis}Se ha meado</span><span>${IC.patas}Se ha chupado las patas</span></div>
- <small style="display:block;margin-top:8px">Cada fila es una hora del día: lo que pasa a la misma hora cae en la misma línea. Toca un registro para editarlo.</small>`}
+ <small style="display:block;margin-top:8px">Cada fila es una hora del día: lo que pasa a la misma hora cae en la misma línea.${semMes?' Desliza la tabla hacia los lados para ver todos los días.':''} Toca un registro para editarlo.</small>`}
+function expSem(){
+ const M=semModel(),{days,ds,n,by,hs,f,E,wd}=M;
+ const q=v=>'"'+String(v).replace(/"/g,'""')+'"',lab=i=>(i.r==='pis'?'Meado ':'Patas ')+i.time;
+ const rows=[['Hora',...days.map(d=>DIAS[wd(d)]+' '+f(d))].map(q).join(';')];
+ hs.forEach(h=>rows.push([q(h+':00'),...(by[h]||E()).map(L=>q([...L].sort((a,b)=>a.time<b.time?-1:1).map(lab).join('\n')))].join(';')));
+ rows.push([q('Total'),...M.tot.map(x=>x||'')].join(';'));
+ saveFile((semMes?'mes-'+mo.y+'-'+pad(mo.m+1):'semana-'+wk)+'.csv','\uFEFF'+rows.join('\r\n'))}
 function render(){$('#nv').innerHTML=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="tab='${t[0]}';render()">${t[1]}</button>`).join('');
  $('#v').innerHTML=({panel:vPanel,hist:vHist,sem:vSem,cal:vCal,tl:vTl,notas:vNotas,datos:vDatos})[tab]()}
 /* ---------- Formulario y acciones ---------- */
